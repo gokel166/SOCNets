@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+        <script src="https://code.angularjs.org/1.5.8/angular-route.js"></script>
+        <script>
+            
+                var app = angular.module('app', ['ngRoute']);
+
+                angular.module('app').controller('HomeController', function($http) {
+                    var vm = this;
+
+                    vm.users = [];
+
+                    vm.title = "You are on the home controller";
+
+                    vm.getUsers = () => {
+                        $http.get('/api/users').then((respone) => {
+                            vm.users = respone.data;
+                        });
+                    }
+
+                    vm.getUsers();
+
+                    // Update users
+
+                    vm.updateUser = (user) => {
+                        if (user) {
+                            $http.put('/api/users', user).then((respone) => {
+                                console.log('updated user');
+                                vm.getUsers();
+                            })
+                        }
+                    }
+                    //remove users
+                    vm.removeUser = (user) => {
+                        console.log(user);
+                        if (user) {
+                            $http.delete('/api/users/' + user._id).then((response) => {
+                                vm.getUsers();
+                            });
+                        }
+                    }
+
+                    vm.addUser = (user) => {
+                        if (user && user.firstname && user.lastname && user.age){
+                            console.log('about to create a user');
+
+                            $http.post('/api/users', user).then((respone) => {
+                                vm.getUsers();
+                                vm.user = '';
+                                vm.adduser = false;
+                            });
+                        }
+                        else {
+                            console.log('Could not supply details');
+                        }
+                    }
+                    return true;
+                });
+
+                angular.module('app').config(($routeProvider) => {
+                    $routeProvider.when('/', {
+                        controller: 'HomeController',
+                        controllerAs: 'vm',
+                        templateUrl: './home.html'
+                    });
+                    $routeProvider.otherwise('/');
+                });
+            
+        </script>
+        <meta charset="UTF-8">
+        <title>Mean End To End</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Welcome To the MEAN</h1>
+                    <div ng-view></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
